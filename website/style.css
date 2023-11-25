@@ -1,0 +1,89 @@
+/* General page styling */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Styling the chat container */
+#chat-container {
+    width: 80%;
+    max-width: 600px;
+    height: 500px;
+    overflow-y: auto;
+    border: 2px solid #007bff;
+    border-radius: 10px;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Input area styling */
+#input-area {
+    width: 80%;
+    max-width: 600px;
+    margin-top: 10px;
+    display: flex;
+}
+
+#message-input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 2px solid #007bff;
+    border-radius: 10px 0 0 10px;
+    border-right: none;
+}
+
+#send-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 0 10px 10px 0;
+    cursor: pointer;
+}
+
+#send-button:hover {
+    background-color: #0056b3;
+}
+
+/* Chat message styling */
+.message {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 20px;
+    color: white;
+    max-width: 70%;
+}
+
+.user-message {
+    background-color: #007bff;
+    margin-left: auto;
+}
+
+.bot-message {
+    background-color: #28a745;
+}
+
+/* Avatar styling */
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.user-avatar {
+    background-image: url('resources/images/user_avatar.png');
+    background-size: cover;
+}
+
+.doctor-avatar {
+    background-image: url('resources/images/doctor_avatar.png');
+    background-size: cover;
+}
