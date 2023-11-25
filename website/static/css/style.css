@@ -103,11 +103,11 @@ body {
 }
 
 .user-avatar {
-    background-image: url('images/user_avatar.png');
+    background-image: url('/static/images/user_avatar.png');
 }
 
 .doctor-avatar {
-    background-image: url('images/doctor_avatar.png');
+    background-image: url('/static/images/doctor_avatar.png');
 }
 
 /* Animation keyframes */

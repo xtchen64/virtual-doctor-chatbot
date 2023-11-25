@@ -12,7 +12,7 @@ A virtual doctor chatbot that helps patient diagnose their disease based on a sp
 ![Virtual Doctor Product Design](https://github.com/xtchen64/virtual-doctor-chatbot/blob/main/resources/images/virtual_doctor_design.png)
 
 ## Guidance
-To run the website demo, please run `open website/index.html`.
+To run the website demo, please run `python website/app.py`.
 
 ## Resources
 - ChatDoctor Repo ([link](https://github.com/Kent0n-Li/ChatDoctor))
