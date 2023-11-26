@@ -9,6 +9,8 @@ A virtual doctor chatbot that helps patient diagnose their disease based on a sp
 - [WIP] speech transcribing & generation
 - [WIP] web-based UI
 
+![Virtual Doctor Chatbot Demo](https://github.com/xtchen64/virtual-doctor-chatbot/blob/main/resources/images/demo.jpg)
+
 ![Virtual Doctor Product Design](https://github.com/xtchen64/virtual-doctor-chatbot/blob/main/resources/images/virtual_doctor_design.png)
 
 ## Guidance
