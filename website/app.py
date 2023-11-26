@@ -30,7 +30,7 @@ def get_prompt(text: str, prompt_id=1, symptom_list_str=""):
   ```{text}```
 
   Do one of the following, whichever is better:
-  1) If the patient provided any medical symptoms in the text, summarize the the symptoms in a Python list, for example: ['headache','toothache']. Do not say anything else besides this list.
+  1) If the patient provided any medical symptoms in the text, summarize the the medical symptoms in a Python list, for example: ['headache','toothache']. Do not say anything else besides this list. Note that irrelevant words such as greeting-related text are not symptoms - please use your medical expertise to make the judgement. Do not hallucinate symptoms that are not in the text.
   2) If the patient did not provide any medical symptoms in the text, then do not respond with a list. Instead, respond to their message in conversation-style sentences, and then tell the patient politely that you did not hear any symptoms and ask the patient to provide their symptoms. Do not respond with a list in this scenario.
   """
 
@@ -54,7 +54,7 @@ def get_prompt(text: str, prompt_id=1, symptom_list_str=""):
       1) if the patient wants to add/remove any symptom, then add/remove the symptom in the original symptom list, and return the symptom list, for example: ['headache','toothache','chest pain']. Do not say anything else besides this list.
       2) if the patient wants to modify the symptom list, then add any new symptoms captured, and revise the existing list accordingly (you can remove/modify symptoms), and return the revised symptom list, for example, ['headache','severe toothache'] Do not say anything else besides this list.
       3) if it seems that the patient has more symptoms than there are in the list, then do not respond with a list. Instead, respond to their message in conversation-style sentences, encourage them to share more about their symptoms.
-      4) if the patient only says they want to add/revise the symptoms without providing enough information on the symptoms per se, then do not respond with a list. Instead, respond to their message in conversation-style sentences, and then politely ask the patient to provide more details or ask clarifying questions.
+      4) if the patient shows any hesitation (e.g. "not sure" or "hmm"), or only says they want to add/revise the symptoms without providing enough information on the symptoms per se, then do not respond with a list. Instead, address the patient by comforting them, and then politely ask the patient to provide more details or ask clarifying questions.
   """
 
   prompt_dict = {1: prompt1, 2: prompt2}
@@ -105,28 +105,32 @@ def handle_request():
         b. if doctor_raw_response starts with "[" => Update symptom_list_str with doctor_raw_response => doctor_confirm_response
         b. else => return doctor_raw_response
     """
-    prompt = get_prompt(user_text, prompt_id, symptom_list_str)
-    doctor_raw_response = get_response(prompt, client)
+    if user_text == "start_session":
+        doctor_response = "Hello, I'm your virtual doctor. How can I assist you today?"
+        active_session = True
+    else:
+        prompt = get_prompt(user_text, prompt_id, symptom_list_str)
+        doctor_raw_response = get_response(prompt, client)
+        
+        if prompt_id == 1:
+            if doctor_raw_response.startswith("["):
+                symptom_list_str = doctor_raw_response  # Update the global variable
+                prompt_id = 2
+                doctor_response = 'Based on our conversation, these are your symptoms: {}. Is there anything that you want to add or clarify?'.format(symptom_list_str)
+            else:
+                doctor_response = doctor_raw_response
+        
+        else:  # prompt_id == 2
+            if doctor_raw_response == "proceed":
+                doctor_response = "Thank you for using virtual doctor! Based on our conversation, these are your symptoms: {}. Good bye!".format(symptom_list_str)
+                active_session = False
+            elif doctor_raw_response.startswith("["):
+                symptom_list_str = doctor_raw_response  # Update the global variable
+                doctor_response = 'Based on our conversation, these are your symptoms: {}. Is there anything that you want to add or clarify?'.format(symptom_list_str)
+            else:
+                doctor_response = doctor_raw_response
 
-    if prompt_id == 1:
-        if doctor_raw_response.startswith("["):
-            symptom_list_str = doctor_raw_response  # Update the global variable
-            prompt_id = 2
-            doctor_response = 'Based on our conversation, these are your symptoms: {}. Is there anything that you want to add or clarify?'.format(symptom_list_str)
-        else:
-            doctor_response = doctor_raw_response
-    
-    else:  # prompt_id == 2
-        if doctor_raw_response == "proceed":
-            doctor_response = "Thank you for using virtual doctor! Based on our conversation, these are your symptoms: {}. Good bye!".format(symptom_list_str)
-            active_session = False
-        elif doctor_raw_response.startswith("["):
-            symptom_list_str = doctor_raw_response  # Update the global variable
-            doctor_response = 'Based on our conversation, these are your symptoms: {}. Is there anything that you want to add or clarify?'.format(symptom_list_str)
-        else:
-            doctor_response = doctor_raw_response
-
-    return jsonify({"message": doctor_response})
+    return jsonify({"message": doctor_response, "active_session": active_session})
 
 if __name__ == '__main__':
     app.run(debug=True)

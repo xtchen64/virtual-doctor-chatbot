@@ -1,7 +1,27 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Initial greeting from the doctor when the page loads
-    addMessage("Hello, I'm your virtual doctor. If you tell me about how you feel, I can help you with initial diagnosis.", "bot");
+    // Start the session automatically
+    startSession();
 });
+
+function startSession() {
+    // Make an API call to get the initial greeting
+    fetch('/get-response', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: "start_session" }) // Example text to initiate the session
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Display the response from the server (initial greeting)
+        addMessage(data.message, "bot");
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        addMessage("Sorry, there was an error starting the session.", "bot");
+    });
+}
 
 function addMessage(message, sender) {
     var chatContainer = document.getElementById('chat-container');
@@ -48,11 +68,26 @@ function sendMessage() {
     .then(data => {
         // Display the response from the server
         addMessage(data.message, "bot");
+
+        // Check if the session has ended
+        if (!data.active_session) {
+            // Display a session-end message or UI element
+            displaySessionEndUI();
+        }
     })
-    .catch((error) => {
-        console.error('Error:', error);
-        addMessage("Sorry, there was an error processing your request.", "bot");
-    });
+}
+
+function displaySessionEndUI() {
+    // Example: Display a session-end message
+    var chatContainer = document.getElementById('chat-container');
+    var sessionEndMessage = document.createElement('div');
+    sessionEndMessage.className = 'session-end-message';
+    sessionEndMessage.textContent = "This session has ended. Thank you for using the virtual doctor!";
+    chatContainer.appendChild(sessionEndMessage);
+
+    // Optionally, disable the input area
+    document.getElementById('message-input').disabled = true;
+    document.getElementById('send-button').disabled = true;
 }
 
 // Event listeners for sending a message
