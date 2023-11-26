@@ -5,7 +5,7 @@ from openai import OpenAI
 app = Flask(__name__)
 
 # Replace 'your_openai_api_key' with your actual OpenAI API key
-openai.api_key = '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'
+openai.api_key = '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'
 # Set up client
 client = OpenAI(
     # defaults to os.environ.get("OPENAI_API_KEY")
@@ -20,13 +20,10 @@ def get_prompt(text: str, prompt_id=1, symptom_list_str=""):
   # Prompt 1: Determine if answer contains symptoms:
   # - if yes, process potential symptoms into a list
   # - if not, ask user to provide symptoms
-  prompt1 = f""" Imagine you are a professional medical doctor and speaking with a patient. \
-  The conversation with the patient is in the text below, delimited by triple backticks. \
-  ```{text}```
-
-  Do one of the following, whichever is better:
-  1) If the patient provided any symptoms in the text, summarize the the symptoms in a Python list, for example: ['headache','toothache']. Do not say anything else besides this list.
-  2) If the patient did not provide any symptoms in the text, then do not respond with a list. Instead, respond to their message in conversation-style sentences, and then tell the patient politely that you did not hear any symptoms and ask the patient to provide their symptoms. Do not respond with a list in this scenario.
+  prompt1 = f""" 
+  Based on the above conversation, respond appropriately as a virtual doctor. 
+  If the patient has provided symptoms, summarize them in a list (for example: ['headache','toothache']), and do not say anything else besides this list. 
+  If not, ask for symptoms in a conversational style.
   """
 
   # Prompt 2: Determine if the patient says the symptom list looks good:
@@ -82,14 +79,17 @@ def index():
 @app.route('/get-response', methods=['POST'])
 def handle_request():
     data = request.json
-    user_text = data['text']
+    patient_input = data['patientInput']
+    symptom_list = data.get('symptomList', [])
 
-    # Generate the prompt
-    prompt = get_prompt(user_text)
-
-    # Get the response from OpenAI
+    # Generate the prompt based on patient input
+    prompt_id = 2 if symptom_list else 1
+    symptom_list_str = ','.join(symptom_list)
+    prompt = get_prompt(patient_input, prompt_id, symptom_list_str)
+    
     response_message = get_response(prompt, client)
-    return jsonify({"message": response_message})
+
+    return jsonify({"doctorResponse": response_message})
 
 if __name__ == '__main__':
     app.run(debug=True)

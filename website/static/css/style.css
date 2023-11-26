@@ -3,7 +3,7 @@ body {
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-    background: linear-gradient(to right, #e6f8f9, #e9e9e9); /* Light gradient background */
+    background: #f4f4f4;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -11,13 +11,12 @@ body {
     height: 100vh;
 }
 
-/* Styling for the title */
 #chat-title {
     margin-top: 20px;
     text-align: center;
     color: #007bff;
-    font-size: 2em;  /* Larger font size */
-    font-weight: bold;  /* Bold font */
+    font-size: 2em;
+    font-weight: bold;
 }
 
 /* Styling the chat container */
@@ -65,7 +64,7 @@ body {
 /* Chat message styling */
 .message {
     display: flex;
-    align-items: flex-start; /* Align items to the top */
+    align-items: center;
     padding: 10px;
     margin: 10px 0;
     border-radius: 25px;
@@ -76,25 +75,18 @@ body {
     box-sizing: border-box;
 }
 
-/* Ensure that the text within the message is also allowed to wrap */
-.message-text {
-    flex-grow: 1;  /* Allow the text container to grow */
-    margin-left: 10px;  /* Add some space between avatar and text */
-    word-break: break-word;  /* Break the word to prevent overflow */
-}
-
 .user-message {
-    background-color: #4a90e2; /* Different shade for user */
+    background-color: #4a90e2;
     margin-left: auto;
 }
 
 .bot-message {
-    background-color: #34a853; /* Different shade for bot */
+    background-color: #34a853;
 }
 
 /* Avatar styling */
 .avatar {
-    flex-shrink: 0; /* Prevent the avatar from shrinking */
+    flex-shrink: 0;
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -110,14 +102,8 @@ body {
     background-image: url('/static/images/doctor_avatar.png');
 }
 
-/* Animation keyframes */
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* Disabled input and button styling */
+#message-input:disabled, #send-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
