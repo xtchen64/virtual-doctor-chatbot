@@ -1,17 +1,22 @@
 from flask import Flask, render_template, request, jsonify
 import openai
 from openai import OpenAI
+from config import OPENAI_API_KEY
 
 app = Flask(__name__)
 
 # Replace 'your_openai_api_key' with your actual OpenAI API key
-openai.api_key = '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'
+openai.api_key = OPENAI_API_KEY
 # Set up client
 client = OpenAI(
     # defaults to os.environ.get("OPENAI_API_KEY")
     api_key=openai.api_key,
 )
 
+# Global variables
+prompt_id = 1
+symptom_list_str = ""
+active_session = True
 
 def get_prompt(text: str, prompt_id=1, symptom_list_str=""):
   """
@@ -25,8 +30,8 @@ def get_prompt(text: str, prompt_id=1, symptom_list_str=""):
   ```{text}```
 
   Do one of the following, whichever is better:
-  1) If the patient provided any symptoms in the text, summarize the the symptoms in a Python list, for example: ['headache','toothache']. Do not say anything else besides this list.
-  2) If the patient did not provide any symptoms in the text, then do not respond with a list. Instead, respond to their message in conversation-style sentences, and then tell the patient politely that you did not hear any symptoms and ask the patient to provide their symptoms. Do not respond with a list in this scenario.
+  1) If the patient provided any medical symptoms in the text, summarize the the symptoms in a Python list, for example: ['headache','toothache']. Do not say anything else besides this list.
+  2) If the patient did not provide any medical symptoms in the text, then do not respond with a list. Instead, respond to their message in conversation-style sentences, and then tell the patient politely that you did not hear any symptoms and ask the patient to provide their symptoms. Do not respond with a list in this scenario.
   """
 
   # Prompt 2: Determine if the patient says the symptom list looks good:
@@ -58,22 +63,25 @@ def get_prompt(text: str, prompt_id=1, symptom_list_str=""):
 
 
 def get_response(prompt, client):
-  """
-  Returns response from prompt.
-  """
-  response = client.chat.completions.create(
-      messages=[
-          {
-              "role": "user",
-              "content": prompt,
-          }
-      ],
-      model="gpt-3.5-turbo",
-  )
+    """
+    Returns response from prompt.
+    """
+    try:
+        response = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ],
+            model="gpt-3.5-turbo",
+        )
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
-  message = response.choices[0].message.content
+    message = response.choices[0].message.content
 
-  return message
+    return message
 
 @app.route('/')
 def index():
@@ -81,15 +89,44 @@ def index():
 
 @app.route('/get-response', methods=['POST'])
 def handle_request():
+    # Declare global variables
+    global prompt_id, symptom_list_str, active_session  # Declare global variables
+
     data = request.json
     user_text = data['text']
 
-    # Generate the prompt
-    prompt = get_prompt(user_text)
+    """
+    Generate doctor_response
+    1. prompt_id == 1 => get prompt => get doctor_raw_response.
+        a. if doctor_raw_response starts with "[" => Update symptom_list_str and set prompt_id to 2 => doctor_confirm_response
+        b. else => directly return doctor_raw_response
+    2. prompt_id == 2 => get prompt => get doctor_raw_response.
+        a. if doctor_raw_response == "proceed" => return doctor_final_words => end session
+        b. if doctor_raw_response starts with "[" => Update symptom_list_str with doctor_raw_response => doctor_confirm_response
+        b. else => return doctor_raw_response
+    """
+    prompt = get_prompt(user_text, prompt_id, symptom_list_str)
+    doctor_raw_response = get_response(prompt, client)
 
-    # Get the response from OpenAI
-    response_message = get_response(prompt, client)
-    return jsonify({"message": response_message})
+    if prompt_id == 1:
+        if doctor_raw_response.startswith("["):
+            symptom_list_str = doctor_raw_response  # Update the global variable
+            prompt_id = 2
+            doctor_response = 'Based on our conversation, these are your symptoms: {}. Is there anything that you want to add or clarify?'.format(symptom_list_str)
+        else:
+            doctor_response = doctor_raw_response
+    
+    else:  # prompt_id == 2
+        if doctor_raw_response == "proceed":
+            doctor_response = "Thank you for using virtual doctor! Based on our conversation, these are your symptoms: {}. Good bye!".format(symptom_list_str)
+            active_session = False
+        elif doctor_raw_response.startswith("["):
+            symptom_list_str = doctor_raw_response  # Update the global variable
+            doctor_response = 'Based on our conversation, these are your symptoms: {}. Is there anything that you want to add or clarify?'.format(symptom_list_str)
+        else:
+            doctor_response = doctor_raw_response
+
+    return jsonify({"message": doctor_response})
 
 if __name__ == '__main__':
     app.run(debug=True)

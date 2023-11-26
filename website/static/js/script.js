@@ -8,11 +8,18 @@ function addMessage(message, sender) {
     var messageClass = sender === "user" ? "user-message" : "bot-message";
     var avatarClass = sender === "user" ? "user-avatar" : "doctor-avatar";
 
+    // Get the current timestamp
+    var timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
     // Create a new div for the message
     var newMessage = document.createElement('div');
     newMessage.className = 'message ' + messageClass;
-    newMessage.innerHTML = '<div class="avatar ' + avatarClass + '"></div>' +
-                           '<div class="message-text">' + message + '</div>';
+    newMessage.innerHTML = 
+        '<div class="avatar ' + avatarClass + '"></div>' +
+        '<div class="message-wrapper">' +
+            '<div class="timestamp">' + timestamp + '</div>' +
+            '<div class="message-text">' + message + '</div>' +
+        '</div>';
 
     // Append the new message div to the chat container
     chatContainer.appendChild(newMessage);

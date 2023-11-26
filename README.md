@@ -12,6 +12,7 @@ A virtual doctor chatbot that helps patient diagnose their disease based on a sp
 ![Virtual Doctor Product Design](https://github.com/xtchen64/virtual-doctor-chatbot/blob/main/resources/images/virtual_doctor_design.png)
 
 ## Guidance
+Please add a `config.py` file with one line: `OPENAI_API_KEY = 'your_openai_api_key_here'`
 To run the website demo, please run `python website/app.py`.
 
 ## Resources

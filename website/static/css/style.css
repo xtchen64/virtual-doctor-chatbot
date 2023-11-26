@@ -66,7 +66,7 @@ body {
 .message {
     display: flex;
     align-items: flex-start; /* Align items to the top */
-    padding: 10px;
+    padding: 10px 10px 15px 10px;
     margin: 10px 0;
     border-radius: 25px;
     color: white;
@@ -79,6 +79,7 @@ body {
 /* Ensure that the text within the message is also allowed to wrap */
 .message-text {
     flex-grow: 1;  /* Allow the text container to grow */
+    margin-top: 5px;  /* Add some space between timestamp and text */
     margin-left: 10px;  /* Add some space between avatar and text */
     word-break: break-word;  /* Break the word to prevent overflow */
 }
@@ -92,12 +93,29 @@ body {
     background-color: #34a853; /* Different shade for bot */
 }
 
+/* Timestamp styling */
+.timestamp {
+    font-size: 0.75em; /* Smaller font size for timestamp */
+    color: #666; /* Lighter color for timestamp */
+    text-align: right; /* Align the timestamp to the right */
+    padding-bottom: 1px; /* Padding to position the timestamp */
+    width: 100%; /* Make the timestamp take the full width of the wrapper */
+}
+
+.message-wrapper {
+    flex-grow: 1; /* Allow the wrapper to grow */
+    display: flex; /* Use flex layout */
+    flex-direction: column; /* Stack timestamp and text vertically */
+}
+
 /* Avatar styling */
 .avatar {
     flex-shrink: 0; /* Prevent the avatar from shrinking */
+    align-self: flex-start;
     width: 40px;
     height: 40px;
     border-radius: 50%;
+    margin-top: 18px;
     margin-right: 10px;
     background-size: cover;
 }
