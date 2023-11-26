@@ -122,6 +122,7 @@ def handle_request():
         
         else:  # prompt_id == 2
             if doctor_raw_response == "proceed":
+                # TODO: Replace with diagnosis via EBR.
                 doctor_response = "Thank you for using virtual doctor! Based on our conversation, these are your symptoms: {}. Good bye!".format(symptom_list_str)
                 active_session = False
             elif doctor_raw_response.startswith("["):
