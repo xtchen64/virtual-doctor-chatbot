@@ -46,7 +46,7 @@ function addMessage(message, sender, audioFile = null) {
     }
 }
 
-function playAudioResponse(audioSrc) {
+function playAudioResponse(audioSrc, onAudioEnd=null) {
     // Append a unique timestamp to the audio source URL
     const uniqueSrc = audioSrc + '?t=' + new Date().getTime();
 
@@ -59,6 +59,37 @@ function playAudioResponse(audioSrc) {
     // Start the new audio
     currentAudio = new Audio(uniqueSrc);
     currentAudio.play();
+
+    // Call the callback function when audio ends
+    if (onAudioEnd) {
+        currentAudio.onended = onAudioEnd;
+    }
+}
+
+function handleEndSession() {
+    // Function to call the end-session API
+    function endSessionAPI() {
+        fetch('/end-session', {
+            method: 'GET'
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Session ended:", data.message);
+            endSessionUI();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    // Check if there's audio currently playing
+    if (currentAudio && !currentAudio.ended) {
+        // Wait for the audio to finish then call the end-session API
+        playAudioResponse(currentAudio.src, endSessionAPI);
+    } else {
+        // No audio playing, call the end-session API immediately
+        endSessionAPI();
+    }
 }
 
 document.getElementById('send-button').addEventListener('click', function() {
@@ -159,7 +190,7 @@ function sendMessage(userInput) {
     .then(data => {
         addMessage(data.message, "bot", data.audio_file);
         if (!data.active_session) {
-            endSession();
+            handleEndSession();
         }
     })
     .catch((error) => {
@@ -181,8 +212,14 @@ function endSessionUI() {
     sendButton.classList.add('disabled-button');
     recordButton.classList.add('disabled-button');
 
-    // Add a session end message or other UI updates
-    addMessage("This chat session has ended.", "bot");
+    // Create and add the end-of-session message
+    var chatContainer = document.getElementById('chat-container');
+    var endSessionMessage = document.createElement('div');
+    endSessionMessage.className = 'end-session-message';
+    endSessionMessage.textContent = "This chat has ended. Thank you!";
+
+    chatContainer.appendChild(endSessionMessage);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
 function endSession() {

@@ -4,9 +4,9 @@
 ## Description
 A virtual doctor chatbot that helps patient diagnose their disease based on a speech-based conversation, leveraging technologies including:
 - GPT 3.5
-- Embedding Based Retrieval (EBR)
 - Web-based UI
-- [WIP] Speech transcribing & generation
+- Speech transcribing & generation
+- [WIP] Diagnosis with Embedding-Based Retrieval (EBR)
 
 ![Virtual Doctor Chatbot Demo](https://github.com/xtchen64/virtual-doctor-chatbot/blob/main/resources/images/demo.gif)
 

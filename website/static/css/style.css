@@ -152,6 +152,17 @@ body {
     border-radius: 5px;
 }
 
+.end-session-message {
+    width: 100%; /* Full width of the chat container */
+    background-color: #ccc; /* Grey background */
+    padding: 10px; /* Padding around the text */
+    text-align: center; /* Center the text */
+    color: #333; /* Darker text color for contrast */
+    border-radius: 5px; /* Rounded corners */
+    margin: 10px 0; /* Margin above and below the message */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: add a subtle shadow for depth */
+}
+
 #send-button.disabled-button:disabled,
 #record-button.disabled-button:disabled {
     background-color: #898686; /* Grey color */
