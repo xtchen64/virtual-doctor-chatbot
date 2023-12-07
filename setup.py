@@ -19,6 +19,5 @@ setup(
         'openai',
         'gTTS',
         'pydub',
-        'ffmpeg'
     ]
 )
