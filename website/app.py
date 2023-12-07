@@ -69,12 +69,10 @@ def cleanup_temp_data():
     """
     Remove temp data.
     """
-    temp_data_path = 'doctor_response.mp3'
-    if os.path.exists(temp_data_path):
-        os.remove(temp_data_path)
-        print("Temp data removed successfully")
-    else:
-        print("Temp data does not exist")
+    audio_file_path = 'website/doctor_response.mp3'
+    if os.path.exists(audio_file_path):
+        os.remove(audio_file_path)
+        print("Audio file removed successfully")
 
 
 def get_response(prompt, client):
@@ -183,14 +181,22 @@ def handle_request():
 
     # Text to Speech conversion
     tts = gTTS(doctor_response, lang='en')
-    tts.save('doctor_response.mp3')
-    response_data["audio_file"] = '/doctor-response'
+    audio_file_path = 'website/doctor_response.mp3'
+    if os.path.exists(audio_file_path):
+        os.remove(audio_file_path)
+    tts.save(audio_file_path)
 
-    return jsonify({"message": doctor_response, "active_session": active_session})
+    response_data = {
+        "message": doctor_response, 
+        "active_session": active_session,
+        "audio_file": '/doctor-response'  # Provide the endpoint to access the audio file
+    }
+
+    return jsonify(response_data)
 
 @app.route('/doctor-response', methods=['GET'])
 def get_audio_response():
-    return send_file('doctor_response.mp3', as_attachment=True)
+    return send_file('doctor_response.mp3', as_attachment=True, mimetype='audio/mpeg')
 
 @app.route('/end-session', methods=['GET', 'POST'])
 def end_session():

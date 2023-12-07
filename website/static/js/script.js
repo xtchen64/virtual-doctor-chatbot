@@ -1,3 +1,5 @@
+let currentAudio = null;
+
 document.addEventListener('DOMContentLoaded', function() {
     startSession();
 });
@@ -45,13 +47,18 @@ function addMessage(message, sender, audioFile = null) {
 }
 
 function playAudioResponse(audioSrc) {
-    fetch(audioSrc)
-        .then(resp => resp.blob())
-        .then(blob => {
-            const audioUrl = URL.createObjectURL(blob);
-            let audio = new Audio(audioUrl);
-            audio.play();
-        });
+    // Append a unique timestamp to the audio source URL
+    const uniqueSrc = audioSrc + '?t=' + new Date().getTime();
+
+    // Stop currently playing audio if there is one
+    if (currentAudio && !currentAudio.ended) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0; // Reset the playback position
+    }
+
+    // Start the new audio
+    currentAudio = new Audio(uniqueSrc);
+    currentAudio.play();
 }
 
 document.getElementById('send-button').addEventListener('click', function() {
