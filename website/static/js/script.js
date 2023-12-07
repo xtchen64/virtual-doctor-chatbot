@@ -1,20 +1,17 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Start the session automatically
     startSession();
 });
 
 function startSession() {
-    // Make an API call to get the initial greeting
     fetch('/get-response', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: "start_session" }) // Example text to initiate the session
+        body: JSON.stringify({ text: "start_session" })
     })
     .then(response => response.json())
     .then(data => {
-        // Display the response from the server (initial greeting)
         addMessage(data.message, "bot");
     })
     .catch((error) => {
@@ -23,15 +20,13 @@ function startSession() {
     });
 }
 
-function addMessage(message, sender) {
+function addMessage(message, sender, audioFile = null) {
     var chatContainer = document.getElementById('chat-container');
     var messageClass = sender === "user" ? "user-message" : "bot-message";
     var avatarClass = sender === "user" ? "user-avatar" : "doctor-avatar";
 
-    // Get the current timestamp
     var timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    // Create a new div for the message
     var newMessage = document.createElement('div');
     newMessage.className = 'message ' + messageClass;
     newMessage.innerHTML = 
@@ -41,22 +36,111 @@ function addMessage(message, sender) {
             '<div class="message-text">' + message + '</div>' +
         '</div>';
 
-    // Append the new message div to the chat container
     chatContainer.appendChild(newMessage);
-
-    // Scroll to the bottom of the chat container
     chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    if (audioFile && sender === "bot") {
+        playAudioResponse(audioFile);
+    }
 }
 
-function sendMessage() {
+function playAudioResponse(audioSrc) {
+    fetch(audioSrc)
+        .then(resp => resp.blob())
+        .then(blob => {
+            const audioUrl = URL.createObjectURL(blob);
+            let audio = new Audio(audioUrl);
+            audio.play();
+        });
+}
+
+document.getElementById('send-button').addEventListener('click', function() {
     var userInput = document.getElementById('message-input').value.trim();
-    if (!userInput) return; // Prevent sending empty messages
-    document.getElementById('message-input').value = '';
+    if (userInput) {
+        addMessage(userInput, "user");
+        sendMessage(userInput);
+        document.getElementById('message-input').value = '';
+    }
+});
 
-    // Add the user's message to the chat
-    addMessage(userInput, "user");
+document.getElementById('message-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        var userInput = document.getElementById('message-input').value.trim();
+        if (userInput) {
+            addMessage(userInput, "user");
+            sendMessage(userInput);
+            document.getElementById('message-input').value = '';
+        }
+    }
+});
 
-    // Send the user's input to the server and get a response
+let isRecording = false;
+let mediaRecorder;
+let audioChunks = [];
+
+const recordButton = document.getElementById('record-button');
+
+recordButton.addEventListener('click', function() {
+    if (isRecording) {
+        stopRecording();
+        recordButton.textContent = 'Record';
+    } else {
+        startRecording();
+        recordButton.textContent = 'Stop';
+    }
+    isRecording = !isRecording;
+});
+
+function startRecording() {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.start();
+
+            audioChunks = [];
+            mediaRecorder.addEventListener("dataavailable", event => {
+                audioChunks.push(event.data);
+            });
+
+            mediaRecorder.addEventListener("stop", () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
+                sendAudioToServer(audioBlob);
+            });
+        })
+        .catch(error => {
+            console.error('Error accessing media devices:', error);
+        });
+}
+
+function stopRecording() {
+    mediaRecorder.stop();
+}
+
+function sendAudioToServer(audioBlob) {
+    let formData = new FormData();
+    formData.append("file", audioBlob, "recording.mp3");
+
+    fetch('/voice-input', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.text) {
+            addMessage(data.text, "user");
+            sendMessage(data.text);
+        } else if (data.error) {
+            addMessage("Error: " + data.error, "bot");
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        addMessage("Sorry, there was an error processing your audio.", "bot");
+    });
+}
+
+function sendMessage(userInput) {
     fetch('/get-response', {
         method: 'POST',
         headers: {
@@ -66,35 +150,44 @@ function sendMessage() {
     })
     .then(response => response.json())
     .then(data => {
-        // Display the response from the server
-        addMessage(data.message, "bot");
-
-        // Check if the session has ended
+        addMessage(data.message, "bot", data.audio_file);
         if (!data.active_session) {
-            // Display a session-end message or UI element
-            displaySessionEndUI();
+            endSession();
         }
     })
+    .catch((error) => {
+        console.error('Error:', error);
+        addMessage("Sorry, there was an error processing your message.", "bot");
+    });
 }
 
-function displaySessionEndUI() {
-    // Example: Display a session-end message
-    var chatContainer = document.getElementById('chat-container');
-    var sessionEndMessage = document.createElement('div');
-    sessionEndMessage.className = 'session-end-message';
-    sessionEndMessage.textContent = "This session has ended. Thank you for using the virtual doctor!";
-    chatContainer.appendChild(sessionEndMessage);
-
-    // Optionally, disable the input area
+function endSessionUI() {
+    // Disable input and buttons
     document.getElementById('message-input').disabled = true;
-    document.getElementById('send-button').disabled = true;
+    let sendButton = document.getElementById('send-button');
+    let recordButton = document.getElementById('record-button');
+
+    sendButton.disabled = true;
+    recordButton.disabled = true;
+
+    // Add a class to grey out the buttons
+    sendButton.classList.add('disabled-button');
+    recordButton.classList.add('disabled-button');
+
+    // Add a session end message or other UI updates
+    addMessage("This chat session has ended.", "bot");
 }
 
-// Event listeners for sending a message
-document.getElementById('send-button').addEventListener('click', sendMessage);
-document.getElementById('message-input').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        e.preventDefault(); // Prevent the default form submit
-        sendMessage();
-    }
-});
+function endSession() {
+    fetch('/end-session', {
+        method: 'GET'
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Session ended:", data.message);
+        endSessionUI();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}

@@ -6,12 +6,17 @@
 </head>
 <body>
     <h1 id="chat-title">Virtual Doctor Chatbot</h1>
+    
     <div id="chat-container">
         <!-- Chat messages with avatars will be dynamically added here -->
     </div>
+    
     <div id="input-area">
         <input type="text" id="message-input" placeholder="Type your message here...">
         <button id="send-button">Send</button>
+        <button id="record-button" title="Record">
+            Record
+        </button>
     </div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>

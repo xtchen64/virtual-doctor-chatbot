@@ -1,17 +1,20 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify, send_file, render_template
+from flask_cors import CORS
 import openai
 from openai import OpenAI
 from config import OPENAI_API_KEY
+import speech_recognition as sr
+import subprocess
+from gtts import gTTS
+import os
+
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS
 
-# Replace 'your_openai_api_key' with your actual OpenAI API key
 openai.api_key = OPENAI_API_KEY
-# Set up client
-client = OpenAI(
-    # defaults to os.environ.get("OPENAI_API_KEY")
-    api_key=openai.api_key,
-)
+
+client = OpenAI(api_key=openai.api_key)
 
 # Global variables
 prompt_id = 1
@@ -62,6 +65,18 @@ def get_prompt(text: str, prompt_id=1, symptom_list_str=""):
   return prompt
 
 
+def cleanup_temp_data():
+    """
+    Remove temp data.
+    """
+    temp_data_path = 'doctor_response.mp3'
+    if os.path.exists(temp_data_path):
+        os.remove(temp_data_path)
+        print("Temp data removed successfully")
+    else:
+        print("Temp data does not exist")
+
+
 def get_response(prompt, client):
     """
     Returns response from prompt.
@@ -86,6 +101,39 @@ def get_response(prompt, client):
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/voice-input', methods=['POST'])
+def handle_voice_input():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'})
+
+    audio_file = request.files['file']
+    original_audio_path = "temp_audio_original.webm"  # Assuming the file is in WebM format
+    converted_audio_path = "temp_audio_converted.wav"  # Target WAV format
+    audio_file.save(original_audio_path)
+
+    # Use FFmpeg to convert the audio file to PCM WAV format
+    try:
+        subprocess.run(["ffmpeg", "-i", original_audio_path, converted_audio_path])
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+    # Now process the converted file with speech_recognition
+    recognizer = sr.Recognizer()
+    with sr.AudioFile(converted_audio_path) as source:
+        audio_data = recognizer.record(source)
+        try:
+            text = recognizer.recognize_google(audio_data)
+        except sr.UnknownValueError:
+            text = "Speech recognition could not understand audio"
+        except sr.RequestError as e:
+            text = "Could not request results from speech recognition service; {0}".format(e)
+
+    # Clean up: remove temporary files
+    os.remove(original_audio_path)
+    os.remove(converted_audio_path)
+
+    return jsonify({'text': text})
 
 @app.route('/get-response', methods=['POST'])
 def handle_request():
@@ -131,7 +179,25 @@ def handle_request():
             else:
                 doctor_response = doctor_raw_response
 
+    response_data = {"message": doctor_response, "active_session": active_session}
+
+    # Text to Speech conversion
+    tts = gTTS(doctor_response, lang='en')
+    tts.save('doctor_response.mp3')
+    response_data["audio_file"] = '/doctor-response'
+
     return jsonify({"message": doctor_response, "active_session": active_session})
+
+@app.route('/doctor-response', methods=['GET'])
+def get_audio_response():
+    return send_file('doctor_response.mp3', as_attachment=True)
+
+@app.route('/end-session', methods=['GET', 'POST'])
+def end_session():
+    global active_session
+    active_session = False
+    cleanup_temp_data()
+    return jsonify({"message": "Session ended and temp folder cleaned up"})
 
 if __name__ == '__main__':
     app.run(debug=True)
