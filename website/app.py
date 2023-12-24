@@ -75,6 +75,7 @@ def cleanup_temp_data():
         print("Audio file removed successfully")
 
 
+# TODO: Implement embedding-based retrieval to get diagnosis from symptoms
 def get_response(prompt, client):
     """
     Returns response from prompt.
