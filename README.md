@@ -28,4 +28,4 @@ Note that the environment does not use brew or conda.
 
 ## Resources
 - ChatDoctor Repo ([link](https://github.com/Kent0n-Li/ChatDoctor))
-- Autonomous ChatDoctor with Disease Database ([link](https://huggingface.co/spaces/kenton-li/chatdoctor_csv)) - list of diseases, symptoms, medical tests, and medications
+- Autonomous ChatDoctor with Disease Database ([link](https://huggingface.co/spaces/kenton-li/chatdoctor_csv)), where we retrieved the list of diseases, symptoms, medical tests, and medications for `disease_diagnosis.csv`
