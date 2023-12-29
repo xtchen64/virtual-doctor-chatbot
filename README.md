@@ -2,11 +2,11 @@
 **Authors:** Elaine Chen, Qingyang Xu
 
 ## Description
-A virtual doctor chatbot that helps patient diagnose their disease based on a speech-based conversation, leveraging technologies including:
+A virtual doctor chatbot that helps patients diagnose their diseases based on a speech-based conversation, leveraging technologies including:
 - GPT 3.5
 - Web-based UI
 - Speech transcribing & generation
-- [WIP] Diagnosis with Embedding-Based Retrieval (EBR)
+- Diagnosis with Embedding-Based Retrieval (EBR) of patient symptoms
 
 ![Virtual Doctor Chatbot Demo](https://github.com/xtchen64/virtual-doctor-chatbot/blob/main/resources/images/demo.gif)
 
