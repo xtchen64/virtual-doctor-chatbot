@@ -6,6 +6,8 @@ __pycache__/
 # Configs
 config.py
 
+chatbot/
+
 # C extensions
 *.so
 
