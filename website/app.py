@@ -7,6 +7,7 @@ import speech_recognition as sr
 import subprocess
 from gtts import gTTS
 import os
+from utils.embedding_based_diagnosis import find_best_diagnosis
 
 
 app = Flask(__name__)
@@ -75,6 +76,7 @@ def cleanup_temp_data():
         print("Audio file removed successfully")
 
 
+# TODO: Implement embedding-based retrieval to get diagnosis from symptoms
 def get_response(prompt, client):
     """
     Returns response from prompt.
@@ -162,20 +164,26 @@ def handle_request():
             if doctor_raw_response.startswith("["):
                 symptom_list_str = doctor_raw_response  # Update the global variable
                 prompt_id = 2
-                doctor_response = 'Based on our conversation, these are your symptoms: {}. Is there anything that you want to add or clarify?'.format(symptom_list_str)
+                doctor_response = 'Based on our conversation, these are your symptoms: {}. Is there anything that you want to add or clarify?'.format(symptom_list_str.replace("'","")[1:-1])
             else:
                 doctor_response = doctor_raw_response
         
-        else:  # prompt_id == 2
+        elif prompt_id == 2:
             if doctor_raw_response == "proceed":
-                # TODO: Replace with diagnosis via EBR.
-                doctor_response = "Thank you for using virtual doctor! Based on our conversation, these are your symptoms: {}. Good bye!".format(symptom_list_str)
+                diagnosis, score, medications = find_best_diagnosis(symptom_list_str, verbose=True)
+                doctor_response = "Thank you for your patience! Based on your symptoms, the most likely diagnosis is [{}] (with {}% confidence). \
+                The suggested medications are {}. \
+                Hope you feel better soon! Good bye!".format(diagnosis.lower(), int(score*100), ", ".join(medications))
                 active_session = False
+
             elif doctor_raw_response.startswith("["):
                 symptom_list_str = doctor_raw_response  # Update the global variable
-                doctor_response = 'Based on our conversation, these are your symptoms: {}. Is there anything that you want to add or clarify?'.format(symptom_list_str)
+                doctor_response = 'Based on our conversation, these are your symptoms: {}. Is there anything that you want to add or clarify?'.format(symptom_list_str.replace("'","")[1:-1])
             else:
                 doctor_response = doctor_raw_response
+
+        else:
+            raise ValueError(f"Invalid prompt_id: {prompt_id}")
 
     response_data = {"message": doctor_response, "active_session": active_session}
 

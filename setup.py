@@ -19,5 +19,7 @@ setup(
         'openai',
         'gTTS',
         'pydub',
+        'torch',
+        'transformers',
     ]
 )
