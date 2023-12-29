@@ -6,7 +6,7 @@ A virtual doctor chatbot that helps patients diagnose their diseases based on a 
 - GPT 3.5
 - Web-based UI
 - Speech transcribing & generation
-- Diagnosis with Embedding-Based Retrieval (EBR) of patient symptoms
+- Diagnosis with Embedding-Based Retrieval (EBR) of patient symptoms using ClinicalBERT
 
 ![Virtual Doctor Chatbot Demo](https://github.com/xtchen64/virtual-doctor-chatbot/blob/main/resources/images/demo.gif)
 
