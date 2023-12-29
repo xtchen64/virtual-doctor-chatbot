@@ -20,7 +20,7 @@ Note that the environment does not use brew or conda.
   - In vscode, if not prompted to do so, run `command+shift+p`, choose the chatbot interpreter
   - Activate this venv in terminal: `source chatbot/bin/activate`
 2. Install required packages in terminal: `pip install -e .`
-3. Install brew with `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)`. Then run `brew install ffmpeg`. Note that this package can only be installed via brew.
+3. [Optional] For audio recording only. Install brew with `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)`. Then run `brew install ffmpeg`. Note that this package can only be installed via brew.
 
 ## Guidance
 - Please add a `config.py` file with one line: `OPENAI_API_KEY = 'your_openai_api_key_here'`
