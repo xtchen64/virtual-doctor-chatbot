@@ -1,5 +1,5 @@
 # virtual-doctor-chatbot
-**Authors:** Elaine Chen, Qingyang Xu
+**Authors:** Elaine Chen (xtchen64), Qingyang Xu (qyxu1994)
 
 ## Description
 A virtual doctor chatbot that helps patients diagnose their diseases based on a speech-based conversation, leveraging technologies including:
